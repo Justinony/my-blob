@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --ext .ts,.vue --fix",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
+    "deploy:manual": "./deploy.sh",
     "db:types": "supabase gen types typescript --project-id YOUR_PROJECT_ID > src/types/database.ts",
     "db:reset": "supabase db reset",
     "db:push": "supabase db push"

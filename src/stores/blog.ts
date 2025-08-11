@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Article, Category, Tag, User, BlogConfig } from '../types'
 import { articleService, categoryService, tagService, userService } from '../services/database'
+import { mockDataService } from '../services/mockData'
 
 export const useBlogStore = defineStore('blog', {
   state: () => ({
@@ -74,7 +75,19 @@ export const useBlogStore = defineStore('blog', {
       [...state.articles]
         .filter(article => article.status === 'published')
         .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
-        .slice(0, 5)
+        .slice(0, 5),
+    
+    // 统计数据
+    stats: (state) => {
+      const publishedArticles = state.articles.filter(article => article.status === 'published')
+      return {
+        totalArticles: publishedArticles.length,
+        totalViews: publishedArticles.reduce((sum, article) => sum + article.readCount, 0),
+        totalLikes: publishedArticles.reduce((sum, article) => sum + article.likeCount, 0),
+        totalCategories: state.categories.length,
+        totalTags: state.tags.length
+      }
+    }
   },
 
   actions: {
@@ -94,20 +107,30 @@ export const useBlogStore = defineStore('blog', {
     // 获取分类列表
     async fetchCategories() {
       try {
-        this.categories = await categoryService.getAll()
+        // 优先使用mock数据，如果失败则尝试数据库
+        this.categories = await mockDataService.getCategories()
       } catch (error) {
-        console.error('Failed to fetch categories:', error)
-        throw error
+        console.error('Failed to fetch categories from mock data, trying database:', error)
+        try {
+          this.categories = await categoryService.getAll()
+        } catch (dbError) {
+          console.error('Failed to fetch categories from database:', dbError)
+        }
       }
     },
 
     // 获取标签列表
     async fetchTags() {
       try {
-        this.tags = await tagService.getAll()
+        // 优先使用mock数据，如果失败则尝试数据库
+        this.tags = await mockDataService.getTags()
       } catch (error) {
-        console.error('Failed to fetch tags:', error)
-        throw error
+        console.error('Failed to fetch tags from mock data, trying database:', error)
+        try {
+          this.tags = await tagService.getAll()
+        } catch (dbError) {
+          console.error('Failed to fetch tags from database:', dbError)
+        }
       }
     },
 

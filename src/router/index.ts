@@ -8,6 +8,7 @@ import SearchResults from '@/pages/SearchResults.vue'
 import AboutPage from '@/pages/AboutPage.vue'
 import AdminPage from '@/pages/AdminPage.vue'
 import ProfilePage from '@/pages/ProfilePage.vue'
+import Auth from '@/pages/Auth.vue'
 import NotFound from '@/pages/NotFound.vue'
 
 const router = createRouter({
@@ -67,6 +68,16 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfilePage
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Auth
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Auth
     },
     {
       path: '/:pathMatch(.*)*',

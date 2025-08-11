@@ -86,9 +86,9 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="操作" width="280" fixed="right">
             <template #default="{ row }">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 justify-end">
                 <el-button size="small" @click="editArticle(row)">
                   <el-icon><Edit /></el-icon>
                   编辑
@@ -104,6 +104,7 @@
                   size="small"
                   type="danger"
                   @click="deleteArticle(row)"
+                  class="delete-btn"
                 >
                   <el-icon><Delete /></el-icon>
                   删除
@@ -321,5 +322,18 @@ onMounted(async () => {
 .el-pagination {
   --el-pagination-button-color: #6b7280;
   --el-pagination-hover-color: #3b82f6;
+}
+
+.delete-btn {
+  z-index: 10;
+  position: relative;
+}
+
+:deep(.el-table .el-table__fixed-right) {
+  z-index: 3;
+}
+
+:deep(.el-table__body-wrapper) {
+  overflow-x: auto;
 }
 </style>

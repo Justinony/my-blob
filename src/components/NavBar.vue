@@ -2,13 +2,15 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElInput, ElButton, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
-import { Search, Menu, X, Sun, Moon, User, Settings, LogOut } from 'lucide-vue-next'
+import { Search, Menu, X, Sun, Moon, User, Settings, LogOut, LogIn } from 'lucide-vue-next'
 import { useBlogStore } from '@/stores/blog'
+import { useUserStore } from '@/stores/user'
 import { useTheme } from '@/composables/useTheme'
 
 const router = useRouter()
 const route = useRoute()
 const blogStore = useBlogStore()
+const userStore = useUserStore()
 const { isDark, toggleTheme } = useTheme()
 
 const searchQuery = ref('')
@@ -60,7 +62,7 @@ const navigateTo = (path: string) => {
   isMobileMenuOpen.value = false
 }
 
-const handleUserAction = (action: string) => {
+const handleUserAction = async (action: string) => {
   switch (action) {
     case 'profile':
       router.push('/profile')
@@ -69,10 +71,14 @@ const handleUserAction = (action: string) => {
       router.push('/admin')
       break
     case 'logout':
-      // 处理登出逻辑
-      console.log('Logout')
+      await userStore.logout()
+      router.push('/')
       break
   }
+}
+
+const handleLogin = () => {
+  router.push('/login')
 }
 </script>
 
@@ -146,35 +152,46 @@ const handleUserAction = (action: string) => {
             <Moon v-else class="w-4 h-4" />
           </ElButton>
 
-          <!-- User Menu -->
-          <ElDropdown trigger="click" @command="handleUserAction">
-            <div class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-              <img 
-                :src="blogStore.user.avatar" 
-                :alt="blogStore.user.name"
-                class="w-8 h-8 rounded-full object-cover"
-              >
-              <span class="hidden lg:block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ blogStore.user.name }}
-              </span>
-            </div>
-            <template #dropdown>
-              <ElDropdownMenu>
-                <ElDropdownItem command="profile">
-                  <User class="w-4 h-4 mr-2" />
-                  个人资料
-                </ElDropdownItem>
-                <ElDropdownItem command="admin">
-                  <Settings class="w-4 h-4 mr-2" />
-                  管理后台
-                </ElDropdownItem>
-                <ElDropdownItem divided command="logout">
-                  <LogOut class="w-4 h-4 mr-2" />
-                  退出登录
-                </ElDropdownItem>
-              </ElDropdownMenu>
-            </template>
-          </ElDropdown>
+          <!-- User Menu / Login Button -->
+          <div v-if="userStore.isAuthenticated">
+            <ElDropdown trigger="click" @command="handleUserAction">
+              <div class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm">
+                  {{ userStore.userInitials }}
+                </div>
+                <span class="hidden lg:block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ userStore.user?.name }}
+                </span>
+              </div>
+              <template #dropdown>
+                <ElDropdownMenu>
+                  <ElDropdownItem command="profile">
+                    <User class="w-4 h-4 mr-2" />
+                    个人资料
+                  </ElDropdownItem>
+                  <ElDropdownItem v-if="userStore.isAdmin" command="admin">
+                    <Settings class="w-4 h-4 mr-2" />
+                    管理后台
+                  </ElDropdownItem>
+                  <ElDropdownItem divided command="logout">
+                    <LogOut class="w-4 h-4 mr-2" />
+                    退出登录
+                  </ElDropdownItem>
+                </ElDropdownMenu>
+              </template>
+            </ElDropdown>
+          </div>
+          <div v-else>
+            <ElButton
+              type="primary"
+              size="small"
+              @click="handleLogin"
+              class="login-button"
+            >
+              <LogIn class="w-4 h-4 mr-1" />
+              登录
+            </ElButton>
+          </div>
 
           <!-- Mobile Menu Button -->
           <ElButton
@@ -224,6 +241,62 @@ const handleUserAction = (action: string) => {
           >
             {{ item.name }}
           </button>
+          
+          <!-- Mobile User Section -->
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+            <div v-if="userStore.isAuthenticated" class="space-y-1">
+              <!-- User Info -->
+              <div class="flex items-center px-3 py-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm mr-3">
+                  {{ userStore.userInitials }}
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ userStore.user?.name }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ userStore.user?.email }}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- User Actions -->
+              <button
+                @click="navigateTo('/profile')"
+                class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center"
+              >
+                <User class="w-4 h-4 mr-2" />
+                个人资料
+              </button>
+              
+              <button
+                v-if="userStore.isAdmin"
+                @click="navigateTo('/admin')"
+                class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center"
+              >
+                <Settings class="w-4 h-4 mr-2" />
+                管理后台
+              </button>
+              
+              <button
+                @click="handleUserAction('logout')"
+                class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center"
+              >
+                <LogOut class="w-4 h-4 mr-2" />
+                退出登录
+              </button>
+            </div>
+            
+            <div v-else>
+              <button
+                @click="handleLogin"
+                class="w-full px-3 py-2 bg-blue-500 text-white rounded-md text-base font-medium hover:bg-blue-600 transition-colors flex items-center justify-center"
+              >
+                <LogIn class="w-4 h-4 mr-2" />
+                登录
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

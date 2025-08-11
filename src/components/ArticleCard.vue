@@ -45,6 +45,28 @@ const handleLike = (e: Event) => {
   emit('like', props.article.id)
 }
 
+// 获取技术分类样式类
+const getCategoryClass = (categoryName: string) => {
+  const name = categoryName.toLowerCase()
+  if (name.includes('前端') || name.includes('frontend') || name.includes('vue') || name.includes('react')) {
+    return 'tech-frontend'
+  } else if (name.includes('后端') || name.includes('backend') || name.includes('node') || name.includes('python')) {
+    return 'tech-backend'
+  } else if (name.includes('运维') || name.includes('devops') || name.includes('docker') || name.includes('kubernetes')) {
+    return 'tech-devops'
+  } else if (name.includes('ai') || name.includes('机器学习') || name.includes('深度学习') || name.includes('人工智能')) {
+    return 'tech-ai'
+  } else if (name.includes('移动') || name.includes('mobile') || name.includes('ios') || name.includes('android')) {
+    return 'tech-mobile'
+  } else if (name.includes('数据库') || name.includes('database') || name.includes('mysql') || name.includes('mongodb')) {
+    return 'tech-database'
+  } else if (name.includes('工具') || name.includes('tools') || name.includes('git') || name.includes('vscode')) {
+    return 'tech-tools'
+  } else {
+    return 'tech-other'
+  }
+}
+
 const getTagColor = (index: number) => {
   const colors = [
     '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
@@ -122,25 +144,38 @@ const getTagColor = (index: number) => {
         {{ article.excerpt }}
       </p>
 
-      <!-- 标签 -->
+      <!-- 分类和标签 -->
       <div class="flex flex-wrap gap-2 mb-4">
+        <!-- 分类标签 -->
+        <span
+          v-if="article.category"
+          :class="[
+            'px-3 py-1 text-xs font-medium rounded-full border-0 shadow-sm',
+            getCategoryClass(typeof article.category === 'string' ? article.category : article.category.name)
+          ]"
+        >
+          {{ typeof article.category === 'string' ? article.category : article.category.name }}
+        </span>
+        
+        <!-- 技术标签 -->
         <ElTag
-            v-for="(tag, index) in article.tags.slice(0, 3)"
-            :key="typeof tag === 'string' ? tag : tag.id"
-            :style="{ 
-              backgroundColor: getTagColor(index) + '20', 
-              borderColor: getTagColor(index),
-              color: getTagColor(index)
-            }"
-            class="px-2 py-1 text-xs font-medium rounded-full border hover:scale-105 transition-transform duration-200"
-          >
-            {{ typeof tag === 'string' ? tag : tag.name }}
-          </ElTag>
+          v-for="(tag, index) in article.tags.slice(0, 2)"
+          :key="typeof tag === 'string' ? tag : tag.id"
+          :style="{ 
+            backgroundColor: getTagColor(index) + '20', 
+            borderColor: getTagColor(index),
+            color: getTagColor(index)
+          }"
+          class="px-2 py-1 text-xs font-medium rounded-full border hover:scale-105 transition-transform duration-200"
+        >
+          {{ typeof tag === 'string' ? tag : tag.name }}
+        </ElTag>
+        
         <ElTag
-          v-if="article.tags.length > 3"
+          v-if="article.tags.length > 2"
           class="px-2 py-1 text-xs font-medium rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
         >
-          +{{ article.tags.length - 3 }}
+          +{{ article.tags.length - 2 }}
         </ElTag>
       </div>
 
@@ -209,6 +244,39 @@ const getTagColor = (index: number) => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 技术分类颜色 */
+.tech-frontend {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.tech-backend {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.tech-devops {
+  @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200;
+}
+
+.tech-ai {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+
+.tech-mobile {
+  @apply bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200;
+}
+
+.tech-database {
+  @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.tech-tools {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200;
+}
+
+.tech-other {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
 }
 
 @media (max-width: 640px) {

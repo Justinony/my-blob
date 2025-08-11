@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElCard, ElTag, ElDivider } from 'element-plus'
-import { TrendingUp, Folder, Tag, Clock, Eye } from 'lucide-vue-next'
+import { TrendingUp, Folder, Tag, Clock, Eye, Code, Server, Cpu, Brain, Settings } from 'lucide-vue-next'
 import { useBlogStore } from '@/stores/blog'
 import type { Article, Category, Tag as TagType } from '@/types'
 
@@ -33,21 +32,45 @@ const popularTags = computed(() =>
 )
 
 const navigateToArticle = (article: Article) => {
-  router.push(`/articles/${article.id}`)
+  router.push(`/article/${article.id}`)
 }
 
 const navigateToCategory = (category: Category) => {
-  router.push(`/categories/${category.id}`)
+  router.push(`/category/${category.id}`)
 }
 
 const navigateToTag = (tag: TagType) => {
-  router.push(`/tags/${tag.id}`)
+  router.push(`/tag/${tag.id}`)
 }
 
 const getTagSize = (articleCount: number) => {
   if (articleCount >= 5) return 'large'
   if (articleCount >= 3) return 'default'
   return 'small'
+}
+
+// 获取分类图标
+const getCategoryIcon = (iconName: string) => {
+  const iconMap: Record<string, any> = {
+    code: Code,
+    server: Server,
+    cpu: Cpu,
+    brain: Brain,
+    settings: Settings
+  }
+  return iconMap[iconName] || Code
+}
+
+// 获取技术分类样式类
+const getCategoryClass = (categoryName: string) => {
+  const classMap: Record<string, string> = {
+    '前端开发': 'frontend',
+    '后端开发': 'backend', 
+    '算法与数据结构': 'algorithm',
+    '人工智能': 'ai',
+    'DevOps': 'devops'
+  }
+  return classMap[categoryName] || 'frontend'
 }
 
 const formatDate = (dateString: string) => {
@@ -61,30 +84,103 @@ const formatDate = (dateString: string) => {
   if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} 周前`
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
+
+// 组件挂载时加载数据
+onMounted(async () => {
+  // 确保分类和标签数据被加载
+  await Promise.all([
+    blogStore.fetchCategories(),
+    blogStore.fetchTags()
+  ])
+})
 </script>
 
 <template>
   <aside class="space-y-6">
+    <!-- 技术分类 -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+        <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+          <Folder class="w-5 h-5 text-blue-500" />
+          <span>技术分类</span>
+        </div>
+      </div>
+      
+      <div class="p-6 space-y-3">
+        <div
+          v-for="category in categoriesWithCount"
+          :key="category.id"
+          @click="navigateToCategory(category)"
+          class="group cursor-pointer flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-[1.02]"
+        >
+          <div class="flex items-center space-x-3">
+            <div 
+              class="w-3 h-3 rounded-full"
+              :style="{ backgroundColor: category.color }"
+            ></div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+              {{ category.name }}
+            </span>
+          </div>
+          <span 
+            class="text-xs font-medium px-2 py-1 rounded-full text-white"
+            :style="{ backgroundColor: category.color }"
+          >
+            {{ category.articleCount }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 热门标签 -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+        <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+          <Tag class="w-5 h-5 text-green-500" />
+          <span>热门标签</span>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="flex flex-wrap gap-2">
+          <span 
+            v-for="tag in popularTags"
+            :key="tag.id"
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer hover:scale-105 transition-all duration-200 border"
+            :style="{ 
+              backgroundColor: tag.color + '20', 
+              borderColor: tag.color + '40',
+              color: tag.color 
+            }"
+            @click="navigateToTag(tag)"
+          >
+            {{ tag.name }}
+            <span class="ml-1 text-xs opacity-70">({{ tag.articleCount }})</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
     <!-- 热门文章 -->
-    <ElCard class="sidebar-card">
-      <template #header>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-700 dark:to-gray-600 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
         <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
           <TrendingUp class="w-5 h-5 text-orange-500" />
           <span>热门文章</span>
         </div>
-      </template>
+      </div>
       
-      <div class="space-y-4">
+      <div class="p-6 space-y-4">
         <article
           v-for="(article, index) in popularArticles"
           :key="article.id"
           @click="navigateToArticle(article)"
-          class="group cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+          class="group cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-[1.02]"
         >
           <div class="flex items-start space-x-3">
             <!-- 排名 -->
             <div :class="[
-              'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white',
+              'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm',
               {
                 'bg-gradient-to-r from-yellow-400 to-orange-500': index === 0,
                 'bg-gradient-to-r from-gray-400 to-gray-500': index === 1,
@@ -114,7 +210,7 @@ const formatDate = (dateString: string) => {
           </div>
         </article>
       </div>
-    </ElCard>
+    </div>
 
     <!-- 分类导航 -->
     <ElCard class="sidebar-card">
@@ -177,20 +273,20 @@ const formatDate = (dateString: string) => {
     </ElCard>
 
     <!-- 最新文章 -->
-    <ElCard class="sidebar-card">
-      <template #header>
-        <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
-          <Clock class="w-5 h-5 text-purple-500" />
-          <span>最新文章</span>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+          <Clock class="w-5 h-5 text-blue-600" />
+          <span class="font-semibold text-gray-800 dark:text-gray-200">最新文章</span>
         </div>
-      </template>
+      </div>
       
-      <div class="space-y-3">
+      <div class="p-6 space-y-4">
         <article
-          v-for="article in recentArticles"
+          v-for="article in blogStore.recentArticles"
           :key="article.id"
           @click="navigateToArticle(article)"
-          class="group cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+          class="group cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-[1.02]"
         >
           <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 line-clamp-2 mb-2">
             {{ article.title }}
@@ -204,62 +300,77 @@ const formatDate = (dateString: string) => {
           </div>
         </article>
       </div>
-    </ElCard>
+    </div>
 
     <!-- 博主信息卡片 -->
-    <ElCard class="sidebar-card">
-      <div class="text-center space-y-4">
-        <img 
-          :src="blogStore.user.avatar" 
-          :alt="blogStore.user.name"
-          class="w-16 h-16 rounded-full mx-auto object-cover border-2 border-gray-200 dark:border-gray-600"
-        >
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {{ blogStore.user.name }}
-          </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ blogStore.user.bio.slice(0, 50) }}...
-          </p>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="p-6 text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+          {{ blogStore.user.name.charAt(0) }}
         </div>
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {{ blogStore.publishedArticles.length }}
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">文章</div>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          {{ blogStore.user.name }}
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {{ blogStore.user.bio }}
+        </p>
+        <div class="flex justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+          <div class="text-center">
+            <div class="font-semibold text-gray-800 dark:text-gray-200 text-lg">{{ blogStore.stats.totalArticles }}</div>
+            <div>文章</div>
           </div>
-          <div>
-            <div class="text-lg font-bold text-green-600 dark:text-green-400">
-              {{ blogStore.categories.length }}
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">分类</div>
+          <div class="text-center">
+            <div class="font-semibold text-gray-800 dark:text-gray-200 text-lg">{{ blogStore.stats.totalViews }}</div>
+            <div>阅读</div>
           </div>
-          <div>
-            <div class="text-lg font-bold text-purple-600 dark:text-purple-400">
-              {{ blogStore.tags.length }}
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">标签</div>
+          <div class="text-center">
+            <div class="font-semibold text-gray-800 dark:text-gray-200 text-lg">{{ blogStore.stats.totalLikes }}</div>
+            <div>点赞</div>
           </div>
         </div>
       </div>
-    </ElCard>
+    </div>
   </aside>
 </template>
 
 <style scoped>
-.sidebar-card {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm;
-}
-
-.sidebar-card :deep(.el-card__header) {
-  @apply bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600;
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 技术分类颜色 */
+.tech-frontend {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.tech-backend {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.tech-devops {
+  @apply bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200;
+}
+
+.tech-ai {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+
+.tech-mobile {
+  @apply bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200;
+}
+
+.tech-database {
+  @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.tech-tools {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200;
+}
+
+.tech-other {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
 }
 </style>

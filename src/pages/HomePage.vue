@@ -40,7 +40,7 @@ const handleArticleClick = (article: Article) => {
   // 增加阅读量
   blogStore.incrementReadCount(article.id)
   // 跳转到文章详情页
-  router.push(`/articles/${article.id}`)
+  router.push(`/article/${article.id}`)
 }
 
 const handleArticleLike = (articleId: string) => {
@@ -58,7 +58,12 @@ const handlePageChange = (page: number) => {
 
 onMounted(async () => {
   loading.value = true
-  await blogStore.fetchArticles()
+  // 并行加载所有数据
+  await Promise.all([
+    blogStore.fetchArticles(),
+    blogStore.fetchCategories(),
+    blogStore.fetchTags()
+  ])
   loading.value = false
 })
 </script>
