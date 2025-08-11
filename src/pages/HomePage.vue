@@ -30,6 +30,7 @@ const totalPages = computed(() => {
 
 // 精选文章（阅读量最高的文章）
 const featuredArticle = computed(() => {
+  if (blogStore.publishedArticles.length === 0) return null
   return blogStore.publishedArticles.reduce((prev, current) => 
     (prev.readCount > current.readCount) ? prev : current
   )

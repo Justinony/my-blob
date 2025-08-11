@@ -14,6 +14,11 @@ export const useBlogStore = defineStore('blog', {
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20portrait%20of%20a%20friendly%20developer%20with%20modern%20style&image_size=square',
       bio: '博客管理员',
       role: 'admin',
+      socialLinks: {
+        github: 'https://github.com',
+        twitter: 'https://twitter.com',
+        linkedin: 'https://linkedin.com'
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     } as User,
