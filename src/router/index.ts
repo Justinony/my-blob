@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import HomePage from '@/pages/HomePage.vue'
 import ArticleDetail from '@/pages/ArticleDetail.vue'
 import ArticleManage from '@/pages/ArticleManage.vue'
@@ -27,12 +28,14 @@ const router = createRouter({
     {
       path: '/articles',
       name: 'articles',
-      component: ArticleManage
+      component: ArticleManage,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/categories',
       name: 'categories',
-      component: CategoryManage
+      component: CategoryManage,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/category/:id',
@@ -42,7 +45,8 @@ const router = createRouter({
     {
       path: '/tags',
       name: 'tags',
-      component: TagManage
+      component: TagManage,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/tag/:id',
@@ -62,12 +66,14 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: AdminPage
+      component: AdminPage,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/profile',
       name: 'profile',
-      component: ProfilePage
+      component: ProfilePage,
+      meta: { requiresAuth: true }
     },
     {
       path: '/login',
@@ -85,6 +91,40 @@ const router = createRouter({
       component: NotFound
     }
   ]
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  
+  // 检查是否需要认证
+  if (to.meta.requiresAuth) {
+    if (!userStore.isAuthenticated) {
+      // 未登录，重定向到登录页面
+      next({
+        name: 'login',
+        query: { redirect: to.fullPath }
+      })
+      return
+    }
+    
+    // 检查是否需要管理员权限
+    if (to.meta.requiresAdmin) {
+      if (!userStore.isAdmin) {
+        // 不是管理员，重定向到首页
+        next({ name: 'home' })
+        return
+      }
+    }
+  }
+  
+  // 如果已登录用户访问登录/注册页面，重定向到首页
+  if ((to.name === 'login' || to.name === 'register') && userStore.isAuthenticated) {
+    next({ name: 'home' })
+    return
+  }
+  
+  next()
 })
 
 export default router

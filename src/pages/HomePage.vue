@@ -7,10 +7,12 @@ import HeroSection from '@/components/HeroSection.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { useBlogStore } from '@/stores/blog'
+import { useNavbar } from '@/composables/useNavbar'
 import type { Article } from '@/types'
 
 const router = useRouter()
 const blogStore = useBlogStore()
+const { stickyTop } = useNavbar()
 
 const currentPage = ref(1)
 const pageSize = ref(6)
@@ -26,6 +28,18 @@ const paginatedArticles = computed(() => {
 // 总页数
 const totalPages = computed(() => {
   return Math.ceil(blogStore.publishedArticles.length / pageSize.value)
+})
+
+// 判断是否应该显示侧边栏
+const shouldShowSidebar = computed(() => {
+  // 如果有精选文章或者文章总数大于3篇，则显示侧边栏
+  return featuredArticle.value !== null || blogStore.publishedArticles.length > 3
+})
+
+// 判断是否显示英雄区块
+const shouldShowHeroSection = computed(() => {
+  // 如果有文章内容，则显示英雄区块
+  return blogStore.publishedArticles.length > 0
 })
 
 // 精选文章（阅读量最高的文章）
@@ -73,14 +87,14 @@ onMounted(async () => {
     <!-- 导航栏 -->
     <NavBar />
     
-    <!-- 英雄区块 -->
-    <HeroSection />
+    <!-- 英雄区块 - 根据内容动态调整 -->
+    <HeroSection v-if="shouldShowHeroSection" />
     
     <!-- 主要内容区域 -->
     <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div class="lg:grid lg:gap-8" :class="shouldShowSidebar ? 'lg:grid-cols-4' : 'lg:grid-cols-1'">
         <!-- 文章内容区域 -->
-        <div class="lg:col-span-3 space-y-8">
+        <div :class="shouldShowSidebar ? 'lg:col-span-3' : 'lg:col-span-1'" class="space-y-8">
           <!-- 精选文章 -->
           <section v-if="featuredArticle" class="mb-12">
             <div class="flex items-center space-x-2 mb-6">
@@ -176,9 +190,9 @@ onMounted(async () => {
           </section>
         </div>
 
-        <!-- 侧边栏 -->
-        <div class="lg:col-span-1">
-          <div class="sticky top-24">
+        <!-- 侧边栏 - 只在有足够内容时显示 -->
+        <div v-if="shouldShowSidebar" class="lg:col-span-1">
+          <div :class="['sticky', stickyTop]">
             <Sidebar />
           </div>
         </div>

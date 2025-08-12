@@ -10,7 +10,7 @@ export const useBlogStore = defineStore('blog', {
     tags: [] as Tag[],
     user: {
       id: '1',
-      name: '管理员',
+      name: '前端开发工程师',
       email: 'admin@example.com',
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20portrait%20of%20a%20friendly%20developer%20with%20modern%20style&image_size=square',
       bio: '博客管理员',

@@ -21,7 +21,7 @@
             <el-dropdown @command="handleUserAction">
               <div class="flex items-center space-x-2 cursor-pointer">
                 <el-avatar :size="32" src="https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=admin_avatar_professional&image_size=square" />
-                <span class="text-gray-700">管理员</span>
+                <span class="text-gray-700">前端开发工程师</span>
                 <el-icon><ArrowDown /></el-icon>
               </div>
               <template #dropdown>

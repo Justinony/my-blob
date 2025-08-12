@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4">
+  <div :class="['min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4', pageTopPadding]">
     <div class="max-w-2xl mx-auto text-center">
       <!-- 404 动画图标 -->
       <div class="relative mb-8">
-        <div class="text-8xl md:text-9xl font-bold text-gray-200 select-none">
+        <div class="text-8xl md:text-9xl font-bold text-gray-200 dark:text-gray-700 select-none">
           4<span class="inline-block animate-bounce">0</span>4
         </div>
         
@@ -36,13 +36,13 @@
       
       <!-- 错误信息 -->
       <div class="mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
           页面走丢了
         </h1>
-        <p class="text-lg text-gray-600 mb-2">
+        <p class="text-lg text-gray-600 dark:text-gray-300 mb-2">
           抱歉，您访问的页面不存在或已被移动
         </p>
-        <p class="text-gray-500">
+        <p class="text-gray-500 dark:text-gray-400">
           请检查URL是否正确，或者返回首页继续浏览
         </p>
       </div>
@@ -92,13 +92,13 @@
       </div>
       
       <!-- 推荐内容 -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">推荐内容</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">推荐内容</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- 热门文章 -->
           <div>
-            <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 flex items-center">
               <el-icon class="mr-2 text-red-500"><TrendCharts /></el-icon>
               热门文章
             </h3>
@@ -106,7 +106,7 @@
               <div
                 v-for="article in popularArticles"
                 :key="article.id"
-                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 @click="goToArticle(article.id)"
               >
                 <img
@@ -115,8 +115,8 @@
                   class="w-12 h-12 rounded object-cover"
                 />
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-900 truncate">{{ article.title }}</div>
-                  <div class="text-sm text-gray-500">{{ article.views }} 次阅读</div>
+                  <div class="font-medium text-gray-900 dark:text-white truncate">{{ article.title }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ article.views }} 次阅读</div>
                 </div>
               </div>
             </div>
@@ -124,7 +124,7 @@
           
           <!-- 热门分类 -->
           <div>
-            <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 flex items-center">
               <el-icon class="mr-2 text-blue-500"><Folder /></el-icon>
               热门分类
             </h3>
@@ -132,7 +132,7 @@
               <div
                 v-for="category in popularCategories"
                 :key="category.id"
-                class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 @click="goToCategory(category.id)"
               >
                 <div class="flex items-center space-x-3">
@@ -140,17 +140,17 @@
                     class="w-4 h-4 rounded"
                     :style="{ backgroundColor: category.color }"
                   />
-                  <span class="font-medium text-gray-900">{{ category.name }}</span>
+                  <span class="font-medium text-gray-900 dark:text-white">{{ category.name }}</span>
                 </div>
-                <span class="text-sm text-gray-500">{{ category.count }} 篇</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ category.count }} 篇</span>
               </div>
             </div>
           </div>
         </div>
         
         <!-- 标签云 -->
-        <div class="mt-8 pt-6 border-t border-gray-200">
-          <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 flex items-center">
             <el-icon class="mr-2 text-green-500"><PriceTag /></el-icon>
             热门标签
           </h3>
@@ -169,15 +169,15 @@
       </div>
       
       <!-- 联系信息 -->
-      <div class="mt-8 text-center text-gray-500">
+      <div class="mt-8 text-center text-gray-500 dark:text-gray-400">
         <p class="mb-2">如果问题持续存在，请联系我们</p>
         <div class="flex items-center justify-center space-x-4 text-sm">
-          <a href="mailto:support@example.com" class="hover:text-blue-600 transition-colors">
+          <a href="mailto:support@example.com" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <el-icon class="mr-1"><Message /></el-icon>
             support@example.com
           </a>
           <span>|</span>
-          <a href="tel:400-123-4567" class="hover:text-blue-600 transition-colors">
+          <a href="tel:400-123-4567" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <el-icon class="mr-1"><Phone /></el-icon>
             400-123-4567
           </a>
@@ -188,24 +188,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import {
-  Search,
-  QuestionFilled,
-  Star,
-  House,
-  Back,
-  Warning,
-  TrendCharts,
-  Folder,
-  PriceTag,
-  Message,
-  Phone
-} from '@element-plus/icons-vue'
+import { ElButton, ElInput, ElMessage } from 'element-plus'
+import { Home, Search, Mail, Phone, MapPin } from 'lucide-vue-next'
+import { useBlogStore } from '@/stores/blog'
+import { useNavbar } from '@/composables/useNavbar'
 
 const router = useRouter()
+const blogStore = useBlogStore()
+const { pageTopPadding } = useNavbar()
 const searchQuery = ref('')
 
 // 热门文章
